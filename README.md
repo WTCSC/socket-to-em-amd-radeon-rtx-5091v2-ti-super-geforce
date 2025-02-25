@@ -30,12 +30,6 @@ Install the required libraries using:
 pip install langchain langgraph chromadb pydantic sentence-transformers langchain-openai python-dotenv
 ```
 
-For **Google Vertex AI users**, install:  
-
-```bash
-pip install langchain-google-vertexai
-```
-
 ---
 
 ## **Setup**  
