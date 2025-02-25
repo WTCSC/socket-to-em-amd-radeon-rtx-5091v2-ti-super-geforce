@@ -4,7 +4,7 @@ import socket
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Connect to server
-client.connect(('localhost', 2000))
+client.connect(('10.61.112.174', 2000))
 print("Connected to server")
 
 # Send messages and receive responses
