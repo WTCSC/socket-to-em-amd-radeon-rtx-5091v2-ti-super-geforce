@@ -16,6 +16,15 @@ from langchain_chroma import Chroma
 from sentence_transformers import SentenceTransformer
 from langchain_core.messages import HumanMessage
 from langgraph.types import Command
+from dotenv import load_dotenv
+import socket
+
+client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+# Connect to server
+print("attempting to connect to server")
+client.connect(('localhost', 5000))
+print("Connected to server")
 
 load_dotenv(dotenv_path=".env")
 
@@ -44,16 +53,31 @@ class State(TypedDict):
     # Retreaved docs from cosin similarity search
     docs: str
 
+    # The final answer to the question
+    final_summary: str
+
 # Persist client for collections and local collection storage
 persistent_client = chromadb.PersistentClient(path = "my_local_data")
 
 
                             ##AGENTS AND NODES##
 
+def send_summary(state: State):
+
+    #print("sending AI response to server")
+
+    final_summary = state.get("final_summary")
+    client.send(final_summary.encode())
+    response = client.recv(1024).decode()
+
+    print(f"Server says: {response}")
+
+    return {"final_summary": [final_summary]}
+
 # Node for enhancing question for similarity search
 def query_rewrite(state: State):
     
-    print("\n---REWRITING QUERY---\n")
+    #print("\n---REWRITING QUERY---\n")
     
     # Fetch question for state
     messages = state["messages"]
@@ -75,7 +99,7 @@ def query_rewrite(state: State):
     
     # Sending the message to the model defined above
     response = model.invoke(msg)
-    print("Rewriten query: " + response.content)
+    #print("Rewriten query: " + response.content)
     
     # Adding the response question to message flow in state
     return {"messages": [response]}
@@ -86,7 +110,7 @@ def query_rewrite(state: State):
 # Node responsible for finding the correct collection to query
 def collection(state: State):
     
-    print("\n---FINDING CORRECT COLLECTION---\n")
+    #print("\n---FINDING CORRECT COLLECTION---\n")
 
     # Class for forcing the output to be specific so that routing can be more consistant
     class collection(BaseModel):
@@ -140,12 +164,12 @@ def similarity_search(state: State):
     messages = state["messages"]
     question = messages[1].content
 
-    print("\n---PREFORMING SIMILARITY SEARCH---\n")
+    #print("\n---PREFORMING SIMILARITY SEARCH---\n")
 
     # Pulls the collection name var from the state
     collection_name = state.get("collection_name")
 
-    print(f"\nSearching collection: {collection_name}\n")
+    #print(f"\nSearching collection: {collection_name}\n")
     
     # Defines how many dimentions the embeddings should be formatted into
     dimensions = 384
@@ -189,7 +213,7 @@ def similarity_search(state: State):
 # Generate node for final summary
 def generate(state: State):
 
-    print("\n---GENERATING INFORMATION---\n")
+    #print("\n---GENERATING INFORMATION---\n")
     
     # fetch original question and docs
     messages = state["messages"]
@@ -205,13 +229,6 @@ def generate(state: State):
             
             You are an expert at answering questions using retrieved context chunks from a RAG system.
             Your role is to synthesize information from the chunks to provide accurate, well-supported answers.
-            You must explain your reasoning process before providing the answer.
-            
-            steps=
-                1. Analyze the question and available context chunks
-                2. Identify the most relevant information in the chunks
-                3. Explain how you'll use this information to answer the question
-                4. Synthesize information into a coherent answer
         
             output_instructions=
                 provide a clear, direct answer based on the context
@@ -230,12 +247,22 @@ def generate(state: State):
     # Invoking the model
     response = model.invoke(msg)
 
-    print("\n---SUMMARY---\n")
+    #print("\n---SUMMARY---\n")
 
-    print("summary:", response.content)
+    #print("summary:", response.content)
+
+    final_summary = response.content
+
+    state_update = {
+            "final_summary": final_summary,
+    }
+
+    # Command for updating the state
+    return Command(update=state_update)
+
 
     # Adds summary into the messages cadigory in the state
-    return {"messages": [response]}
+    #return {"messages": [response]}
 
                             ##CONVENTIONAL EDGES##
 
@@ -285,13 +312,13 @@ def route_RAG(state: State):
 
     # based on the LLM's output what node to go to (query_rewrite or END)
     if route == 'RAG':
-        print("\nROUTE: query_rewrite\n")
+        #print("\nROUTE: query_rewrite\n")
         return "query_rewrite"
     elif route == 'END':
-        print("\nROUTE: END\n")
+        #print("\nROUTE: END\n")
         return END
     else:
-        print("Error route not valid")
+        #print("Error route not valid")
         return END
 
 
@@ -303,14 +330,14 @@ def route_collection(state: State):
 
     # Not in collection
     if collection == 'END':
-        print("\nbook not in collection\n")
-        print("\n ROUTE: END\n")
+        #print("\nbook not in collection\n")
+        #print("\n ROUTE: END\n")
         return END
     
     # In Collection
     else:
         #print("Collection name:", collection)
-        print("\n ROUTE: similarity_search\n")
+        #print("\n ROUTE: similarity_search\n")
         return "similarity_search"
 
 
@@ -328,6 +355,8 @@ graph_builder.add_node("collection", collection)
 
 graph_builder.add_node("generate", generate)
 
+graph_builder.add_node("send_summary", send_summary)
+
     ## EDGES AND CONDITIONAL EDGES
 
 # Start and figure out if the question is about a book
@@ -343,7 +372,9 @@ graph_builder.add_conditional_edges("collection", route_collection, {"similarity
 graph_builder.add_edge("similarity_search", "generate")
 
 # Generate to end
-graph_builder.add_edge("generate", END)
+graph_builder.add_edge("generate", "send_summary")
+
+graph_builder.add_edge("send_summary", END)
 
                         ##COMPILE THE GRAPH
 graph = graph_builder.compile()
@@ -359,14 +390,26 @@ def stream_graph_updates(user_input: str):
             #print("Assistant:", value["messages"][-1].content)
             #message += value["messages"][-1].content
 
-# User interaction loop
-while True:
-    user_input = input("User: ")
-    if user_input.lower() in ["quit", "exit", "q"]:
-        print("Goodbye!")
-        break
 
-    stream_graph_updates(user_input)
+# User interaction loop
+def main():
+    while True:
+        print("\nEnter a query (or type 'q' to quit)\n")
+        user_input = input("User: ")
+        if user_input.lower() in ["quit", "exit", "q"]:
+            print("Goodbye!")
+            return
+        if not user_input:
+            break
+        client.send(user_input.encode())
+        response = client.recv(1024).decode()
+        print(f"\nServer says: {response}\n")
+
+        stream_graph_updates(user_input)
+
+
+if __name__ == "__main__":
+    main()
         
 #user_input = "where does gatsby describe his cars and their colors"
 #user_input = "test"
