@@ -3,8 +3,11 @@ import socket
 # Create a socket object
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+host = '127.0.0.1'
+port = 2000
+
 # Connect to server
-client.connect(('10.61.112.174', 2000))
+client.connect((host, port))
 print("Connected to server")
 
 # Send messages and receive responses
