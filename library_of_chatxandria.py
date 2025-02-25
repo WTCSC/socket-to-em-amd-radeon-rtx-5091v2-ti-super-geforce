@@ -23,7 +23,7 @@ client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Connect to server
 print("attempting to connect to server")
-client.connect(('localhost', 5000))
+client.connect(('localhost', 2000))
 print("Connected to server")
 
 load_dotenv(dotenv_path=".env")

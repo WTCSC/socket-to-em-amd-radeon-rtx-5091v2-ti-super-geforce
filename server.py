@@ -4,7 +4,7 @@ import socket
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Bind to 0.0.0.0:5000
-server.bind(('127.0.0.1', 2000))
+server.bind(('0.0.0.0', 2000))
 
 # Listen for connections
 server.listen(3)
