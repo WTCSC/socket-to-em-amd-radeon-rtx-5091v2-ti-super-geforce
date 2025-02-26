@@ -8,6 +8,7 @@ Here's a README file for your project:
 
 ## Overview
 The **Graph-Based Retrieval Augmented Generation (RAG) System** is designed to perform semantic search and answer generation for book-related queries. Using a combination of **LangGraph, LangChain, and ChromaDB**, the system **enhances** user questions, **retrieves** the most relevant book content using cosine similarity search on **SentenceTransformer embeddings**, and **generates** contextual responses using **GPT-4o-mini**. This approach **leverages** graph-based workflows to create a **structured**, **efficient**, and **scalable retrieval mechanism**.
+---
 
 ## Features
 
@@ -25,6 +26,7 @@ Uses **SentenceTransformer embeddings** to perform a **cosine similarity search*
 
 ### Response Generation:
 **Synthesizes answers** using **GPT-4o-mini** by **combining retrieved document chunks** with **enhanced query context**.
+---
 
 ## Installation
 
@@ -46,6 +48,7 @@ Create a .env file in the root directory of the project and add your API key:
 
 OPENAI_API_KEY = your_api_key_here
 Alternatively, you can enter the API key when prompted during runtime.
+---
 
 ### Usage
 
@@ -61,39 +64,51 @@ In another terminal, start the client component:
 python Client.py
 ```
 
-Open PowerShell or your preferred command line interface.
-Run ipconfig /all (or the equivalent command on your OS) to obtain the IPV4 address of the computer running the server.
-Connect to the server using the retrieved IPV4 address.
-User Input Format
-Enter queries that relate to the indexed books.
+1. Open **PowerShell or your preferred **command line interface**.
+
+2. Run **ipconfig /all** (or the equivalent command on your OS) to obtain the **IPV4 address** of the computer running the server.
+
+3. Connect to the **server** using the **retrieved IPV4 address**.
+---
+
+## User Input Format
+
+Enter **queries** that **relate** to the **indexed books**.
+
 To exit the program, type any of the following: "quit", "exit", or "q".
-System Workflow
-Determine Query Type:
+---
+
+## System Workflow
+
+### Determine Query Type:
 The system first checks if the query is related to an indexed book. If the query does not pertain to a book, the process exits gracefully.
 
-Query Enhancement:
+### Query Enhancement:
 The original user query is reformulated to improve retrieval performance by the similarity search engine.
 
-Collection Routing:
+### Collection Routing:
 The system identifies the relevant book collection based on the enhanced query. If the queried book is not indexed, the process terminates.
 
-Vector Similarity Search:
+### Vector Similarity Search:
 Using cosine similarity search, the system finds the most relevant document chunks from stored embeddings.
 
-Answer Generation:
+### Answer Generation:
 Retrieved documents and the enhanced query are fed into GPT-4o-mini to generate a coherent and contextually accurate answer.
 
-Response Display:
+### Response Display:
 The final answer is then displayed to the user.
+---
 
-Customization
-Adding More Books
+## Customization
+
+### Adding More Books
 To expand the collection, update the ChromaDB storage and indexing process to include additional books. Modify the data ingestion scripts as needed to handle new collections.
 
-Modifying the Prompt
+### Modifying the Prompt
 Adjust the PromptTemplate within the generate function to tailor the answer format. This allows you to fine-tune the style and content of the generated responses.
+---
 
-Future Enhancements
+## Future Enhancements
 
 Database Expansion:
 Incorporate more book collections to improve the breadth of content retrieval.
