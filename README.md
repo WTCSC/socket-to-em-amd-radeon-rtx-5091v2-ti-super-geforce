@@ -24,43 +24,43 @@ Utilizes **LangGraph** to **implement** a **structured flow of information**, en
 Uses **SentenceTransformer embeddings** to perform a **cosine similarity search** on **stored document chunks**, enabling **precise retrieval of relevant content**.
 
 ### Response Generation:
-Synthesizes answers using GPT-4o-mini by combining retrieved document chunks with enhanced query context.
+**Synthesizes answers** using **GPT-4o-mini** by **combining retrieved document chunks** with **enhanced query context**.
 
-Installation
-Prerequisites
-Python 3.8 or higher
-A reliable internet connection for API access
-Dependencies
-Install the required libraries by running the following command:
+## Installation
 
-bash
-Copy
-Edit
+### Prerequisites
+1. **Python 3.8 or higher**
+
+2. A **reliable** internet connection for API access
+
+### Dependencies
+**Install** the **required libraries** by running the following command:
+```
 pip install langchain langgraph chromadb pydantic sentence-transformers langchain-openai python-dotenv
-Setup
-Environment Variables
-Create a .env file in the root directory of the project and add your API key:
+```
 
-ini
-Copy
-Edit
-OPENAI_API_KEY=your_api_key_here
+### Environment Variables
+```
+Create a .env file in the root directory of the project and add your API key:
+```
+
+OPENAI_API_KEY = your_api_key_here
 Alternatively, you can enter the API key when prompted during runtime.
 
-Usage
-Running the System
+### Usage
+
 To start the interactive session, follow these steps:
 
 Start the server component:
-bash
-Copy
-Edit
+```
 python Server.py
+```
+
 In another terminal, start the client component:
-bash
-Copy
-Edit
+```
 python Client.py
+```
+
 Open PowerShell or your preferred command line interface.
 Run ipconfig /all (or the equivalent command on your OS) to obtain the IPV4 address of the computer running the server.
 Connect to the server using the retrieved IPV4 address.
@@ -94,23 +94,31 @@ Modifying the Prompt
 Adjust the PromptTemplate within the generate function to tailor the answer format. This allows you to fine-tune the style and content of the generated responses.
 
 Future Enhancements
+
 Database Expansion:
 Incorporate more book collections to improve the breadth of content retrieval.
+
 Advanced Reranking:
 Integrate more sophisticated reranking models to further refine search results.
+
 Enhanced UI:
 Develop a chat-based user interface to improve overall user interaction and accessibility.
+
 Troubleshooting
 API Issues:
 Ensure your OPENAI_API_KEY is valid and that you have a stable internet connection.
+
 Installation Problems:
 Verify that all dependencies are installed correctly. Running pip install -r requirements.txt (if a requirements file is provided) may help.
+
 Runtime Errors:
 Check for error messages in the terminal. Common issues may involve network connectivity or missing environment variables.
+
 Data Indexing:
 If queries yield no results, ensure that the book collection has been properly indexed in ChromaDB.
+
 License
 This project is licensed under the MIT License. See the LICENSE file for more details.
 
-Author
+# **Author's**
 Developed by Jacob Casey, Cristian Holmes, and Marcus Quach.
