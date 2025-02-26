@@ -7,22 +7,23 @@ Here's a README file for your project:
 # Graph-Based Retrieval Augmented Generation (RAG) System
 
 ## Overview
-The ***Graph-Based Retrieval Augmented Generation (RAG) System*** is designed to perform semantic search and answer generation for book-related queries. Using a combination of ***LangGraph, LangChain, and ChromaDB***, the system ***enhances*** user questions, ***retrieves*** the most relevant book content using cosine similarity search on ***SentenceTransformer embeddings***, and ***generates*** contextual responses using ***GPT-4o-mini***. This approach ***leverages*** graph-based workflows to create a ***structured***, ***efficient***, and ***scalable retrieval mechanism***.
+The **Graph-Based Retrieval Augmented Generation (RAG) System** is designed to perform semantic search and answer generation for book-related queries. Using a combination of **LangGraph, LangChain, and ChromaDB**, the system **enhances** user questions, **retrieves** the most relevant book content using cosine similarity search on **SentenceTransformer embeddings**, and **generates** contextual responses using **GPT-4o-mini**. This approach **leverages** graph-based workflows to create a **structured**, **efficient**, and **scalable retrieval mechanism**.
 
 ## Features
+
 ### Graph-Based Workflow:
-Utilizes ***LangGraph*** to ***implement*** a ***structured flow of information***, ensuring that ***data retrieval*** and ***response generation*** occur in a logical and traceable manner.
+Utilizes **LangGraph** to **implement** a **structured flow of information**, ensuring that **data retrieval** and **response generation** occur in a logical and traceable manner.
 
-Query Enhancement:
-***Automatically rewrites*** user queries to ***improve the quality*** of similarity searches, making it easier to find the ***best matching content***.
+### Query Enhancement:
+**Automatically rewrites** user queries to **improve the quality** of similarity searches, making it easier to find the **best matching content**.
 
-Collection Routing:
-Determines whether a given query pertains to an indexed book collection and routes the query accordingly.
+### Collection Routing:
+**Determines** whether a **given query** pertains to an **indexed book collection** and **routes the query accordingly**.
 
-Vector Similarity Search:
-Uses SentenceTransformer embeddings to perform a cosine similarity search on stored document chunks, enabling precise retrieval of relevant content.
+### Vector Similarity Search:
+Uses **SentenceTransformer embeddings** to perform a **cosine similarity search** on **stored document chunks**, enabling **precise retrieval of relevant content**.
 
-Response Generation:
+### Response Generation:
 Synthesizes answers using GPT-4o-mini by combining retrieved document chunks with enhanced query context.
 
 Installation
