@@ -1,26 +1,48 @@
 import socket
+from threading import Thread
+
+# Defines IP and port for server.
+host = "localhost"
+port = 2000
+
+# Logs clients into a dictionary. 
+clients = {}
 
 # Create a socket object
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+server.bind((host, port))
 
-# Bind to 0.0.0.0:5000
-server.bind(('0.0.0.0', 2000))
+def handle_clients(connection):
+    name = connection.recv(1024).decode()
+    welcome_message = f"Welcome {name} to our chat room!"
+    connection.send(bytes(welcome_message, "utf8"))
+    message = name + " has recently joined the chat room."
+    broadcast(bytes(message, "utf8"))
 
-# Listen for connections
-server.listen(3)
-print("Waiting for connection...")
+    clients[connection] = name
 
-# Accept client connection
-client, addr = server.accept()
-print(f"Connected to {addr}")
+    while True:
+        message = connection.recv(1024)
+        broadcast(message, name + ":")
 
-# Receive and echo messages
-while True:
-    msg = client.recv(1024).decode()
-    if not msg:
-        break
-    print(f"Received: {msg}")
-    client.send(f"Server received: {msg}".encode())
+def broadcast(message, prefix=""):
+    for client in clients: 
+        client.send(bytes(prefix, "utf8") + message)
 
-client.close()
-server.close()
+def accept_client_connection():
+    while True:
+        client_connection, client_address = server.accept()
+        print(client_address, " has connected")
+
+        client_connection.send(bytes("Welcome to the chat room. Enter your name to continue", "utf8"))
+        Thread(target=handle_clients, args=(client_connection,)).start()
+
+if __name__ == "__main__":
+    server.listen(3)
+    print("listening on port : ", port, "...")
+
+    requests = Thread(target=accept_client_connection)
+
+    requests.start()
+    requests.join()
