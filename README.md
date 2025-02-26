@@ -51,7 +51,11 @@ Alternatively, enter the key when prompted.
 Execute the script to start the interactive session:  
 
 ```bash
-python script.py
+1. python Server.py
+2. python Client.py
+3. Open Powershell or Command Line
+4. ipconfig /all
+5. Connect to server with IPV4 Address
 ```
 
 ### **User Input Format**  
