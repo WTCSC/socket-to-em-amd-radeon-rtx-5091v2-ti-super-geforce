@@ -4,106 +4,112 @@ Here's a README file for your project:
 
 ---
 
-## **Graph-Based Retrieval Augmented Generation (RAG) System**  
+# Graph-Based Retrieval Augmented Generation (RAG) System
 
-### **Overview**  
-This project implements a **Graph-Based Retrieval Augmented Generation (RAG) System** using **LangGraph, LangChain, and ChromaDB** to perform **semantic search and answer generation** for book-related queries. The system enhances user questions, retrieves relevant book content using **cosine similarity search**, and generates responses using **GPT-4o-mini**.  
+## Overview
+The ***Graph-Based Retrieval Augmented Generation (RAG) System*** is designed to perform semantic search and answer generation for book-related queries. Using a combination of ***LangGraph, LangChain, and ChromaDB***, the system ***enhances*** user questions, ***retrieves*** the most relevant book content using cosine similarity search on ***SentenceTransformer embeddings***, and ***generates*** contextual responses using ***GPT-4o-mini***. This approach ***leverages*** graph-based workflows to create a ***structured***, ***efficient***, and ***scalable retrieval mechanism***.
 
-### **Features**  
-- **Graph-Based Workflow:** Implements a structured flow of information using **LangGraph**.  
-- **Query Enhancement:** Rewrites user queries for better similarity search results.  
-- **Collection Routing:** Determines if the query pertains to an indexed book.  
-- **Vector Search:** Uses **SentenceTransformer embeddings** to find relevant document chunks.  
-- **Response Generation:** Provides contextual answers using **GPT-4o-mini**.  
+## Features
+### Graph-Based Workflow:
+Utilizes ***LangGraph*** to ***implement*** a ***structured flow of information***, ensuring that ***data retrieval*** and ***response generation*** occur in a logical and traceable manner.
 
----
+Query Enhancement:
+***Automatically rewrites*** user queries to ***improve the quality*** of similarity searches, making it easier to find the ***best matching content***.
 
-## **Installation**  
+Collection Routing:
+Determines whether a given query pertains to an indexed book collection and routes the query accordingly.
 
-### **Prerequisites**  
-Ensure you have Python **3.8+** installed.  
+Vector Similarity Search:
+Uses SentenceTransformer embeddings to perform a cosine similarity search on stored document chunks, enabling precise retrieval of relevant content.
 
-### **Dependencies**  
-Install the required libraries using:  
+Response Generation:
+Synthesizes answers using GPT-4o-mini by combining retrieved document chunks with enhanced query context.
 
-```bash
+Installation
+Prerequisites
+Python 3.8 or higher
+A reliable internet connection for API access
+Dependencies
+Install the required libraries by running the following command:
+
+bash
+Copy
+Edit
 pip install langchain langgraph chromadb pydantic sentence-transformers langchain-openai python-dotenv
-```
+Setup
+Environment Variables
+Create a .env file in the root directory of the project and add your API key:
 
----
-
-## **Setup**  
-
-### **Environment Variables**  
-Create a `.env` file and add your API key:  
-
-```bash
+ini
+Copy
+Edit
 OPENAI_API_KEY=your_api_key_here
-```
+Alternatively, you can enter the API key when prompted during runtime.
 
-Alternatively, enter the key when prompted.  
+Usage
+Running the System
+To start the interactive session, follow these steps:
 
----
+Start the server component:
+bash
+Copy
+Edit
+python Server.py
+In another terminal, start the client component:
+bash
+Copy
+Edit
+python Client.py
+Open PowerShell or your preferred command line interface.
+Run ipconfig /all (or the equivalent command on your OS) to obtain the IPV4 address of the computer running the server.
+Connect to the server using the retrieved IPV4 address.
+User Input Format
+Enter queries that relate to the indexed books.
+To exit the program, type any of the following: "quit", "exit", or "q".
+System Workflow
+Determine Query Type:
+The system first checks if the query is related to an indexed book. If the query does not pertain to a book, the process exits gracefully.
 
-## **Usage**  
+Query Enhancement:
+The original user query is reformulated to improve retrieval performance by the similarity search engine.
 
-### **Running the System**  
-Execute the script to start the interactive session:  
+Collection Routing:
+The system identifies the relevant book collection based on the enhanced query. If the queried book is not indexed, the process terminates.
 
-```bash
-1. python Server.py
-2. python Client.py
-3. Open Powershell or Command Line
-4. ipconfig /all
-5. Connect to server with IPV4 Address
-```
+Vector Similarity Search:
+Using cosine similarity search, the system finds the most relevant document chunks from stored embeddings.
 
-### **User Input Format**  
-- Enter queries related to indexed books.  
-- Type **"quit"**, **"exit"**, or **"q"** to stop the program.  
+Answer Generation:
+Retrieved documents and the enhanced query are fed into GPT-4o-mini to generate a coherent and contextually accurate answer.
 
----
+Response Display:
+The final answer is then displayed to the user.
 
-## **System Workflow**  
+Customization
+Adding More Books
+To expand the collection, update the ChromaDB storage and indexing process to include additional books. Modify the data ingestion scripts as needed to handle new collections.
 
-1. **Determine Query Type:**  
-   - Checks if the query relates to a book.  
-   - If not, exits.  
+Modifying the Prompt
+Adjust the PromptTemplate within the generate function to tailor the answer format. This allows you to fine-tune the style and content of the generated responses.
 
-2. **Query Enhancement:**  
-   - Reformulates the query for better retrieval.  
+Future Enhancements
+Database Expansion:
+Incorporate more book collections to improve the breadth of content retrieval.
+Advanced Reranking:
+Integrate more sophisticated reranking models to further refine search results.
+Enhanced UI:
+Develop a chat-based user interface to improve overall user interaction and accessibility.
+Troubleshooting
+API Issues:
+Ensure your OPENAI_API_KEY is valid and that you have a stable internet connection.
+Installation Problems:
+Verify that all dependencies are installed correctly. Running pip install -r requirements.txt (if a requirements file is provided) may help.
+Runtime Errors:
+Check for error messages in the terminal. Common issues may involve network connectivity or missing environment variables.
+Data Indexing:
+If queries yield no results, ensure that the book collection has been properly indexed in ChromaDB.
+License
+This project is licensed under the MIT License. See the LICENSE file for more details.
 
-3. **Collection Routing:**  
-   - Identifies the relevant book collection.  
-   - If the book is **not indexed**, exits.  
-
-4. **Vector Similarity Search:**  
-   - Performs **cosine similarity search** on stored embeddings.  
-
-5. **Answer Generation:**  
-   - Synthesizes an answer using retrieved documents and **GPT-4o-mini**.  
-
-6. **Response Display:**  
-   - Outputs the generated answer.  
-
----
-
-## **Customization**  
-
-### **Adding More Books**  
-To expand the collection, modify the **ChromaDB storage** and indexing process to include additional books.  
-
-### **Modifying the Prompt**  
-Update the `PromptTemplate` in the **generate** function to adjust the response format.  
-
----
-
-## **Future Enhancements**  
-- Expand the book database with more collections.  
-- Integrate more sophisticated reranking models.  
-- Improve user interaction with **chat-based UI**.  
-
----
-
-## **Author**  
-Developed by Jacob Casey and Cristian Holmes
+Author
+Developed by Jacob Casey, Cristian Holmes, and Marcus Quach.
