@@ -8,6 +8,7 @@ Here's a README file for your project:
 
 ## Overview
 The **Graph-Based Retrieval Augmented Generation (RAG) System** is designed to perform semantic search and answer generation for book-related queries. Using a combination of **LangGraph, LangChain, and ChromaDB**, the system **enhances** user questions, **retrieves** the most relevant book content using cosine similarity search on **SentenceTransformer embeddings**, and **generates** contextual responses using **GPT-4o-mini**. This approach **leverages** graph-based workflows to create a **structured**, **efficient**, and **scalable retrieval mechanism**.
+
 ---
 
 ## Features
@@ -26,6 +27,7 @@ Uses **SentenceTransformer embeddings** to perform a **cosine similarity search*
 
 ### Response Generation:
 **Synthesizes answers** using **GPT-4o-mini** by **combining retrieved document chunks** with **enhanced query context**.
+
 ---
 
 ## Installation
@@ -69,6 +71,7 @@ python Client.py
 2. Run **ipconfig /all** (or the equivalent command on your OS) to obtain the **IPV4 address** of the computer running the server.
 
 3. Connect to the **server** using the **retrieved IPV4 address**.
+
 ---
 
 ## User Input Format
@@ -76,6 +79,7 @@ python Client.py
 Enter **queries** that **relate** to the **indexed books**.
 
 To **exit** the program, type any of the following: **"quit", "exit", or "q"**.
+
 ---
 
 ## System Workflow
