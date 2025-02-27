@@ -33,23 +33,27 @@ Uses **SentenceTransformer embeddings** to perform a **cosine similarity search*
 ## Installation
 
 ### Prerequisites
+
 1. **Python 3.8 or higher**
 
 2. A **reliable** internet connection for API access
 
 ### Dependencies
 **Install** the **required libraries** by running the following command:
+
 ```
 pip install langchain langgraph chromadb pydantic sentence-transformers langchain-openai python-dotenv
 ```
 
 ### Environment Variables
+
 ```
 Create a .env file in the root directory of the project and add your API key:
 ```
 
 OPENAI_API_KEY = your_api_key_here
 Alternatively, you can enter the API key when prompted during runtime.
+
 ---
 
 ### Usage
@@ -62,6 +66,7 @@ python Server.py
 ```
 
 In another terminal, start the client component:
+
 ```
 python Client.py
 ```
