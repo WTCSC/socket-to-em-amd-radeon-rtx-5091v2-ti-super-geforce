@@ -75,65 +75,70 @@ python Client.py
 
 Enter **queries** that **relate** to the **indexed books**.
 
-To exit the program, type any of the following: "quit", "exit", or "q".
+To **exit** the program, type any of the following: **"quit", "exit", or "q"**.
 ---
 
 ## System Workflow
 
 ### Determine Query Type:
-The system first checks if the query is related to an indexed book. If the query does not pertain to a book, the process exits gracefully.
+The **system** first checks if the **query** is **related** to an **indexed book**. **If** the **query** does not **pertain** to a book, the **process exits** gracefully.
 
 ### Query Enhancement:
-The original user query is reformulated to improve retrieval performance by the similarity search engine.
+The **original user query** is reformulated to **improve retrieval performance** by the **similarity search engine**.
 
 ### Collection Routing:
-The system identifies the relevant book collection based on the enhanced query. If the queried book is not indexed, the process terminates.
+The system **identifies** the **relevant book collection** based on the **enhanced query**. If the queried book is not indexed, the process terminates.
 
 ### Vector Similarity Search:
-Using cosine similarity search, the system finds the most relevant document chunks from stored embeddings.
+Using **cosine similarity search**, the system finds the **most relevant** document chunks from **stored embeddings**.
 
 ### Answer Generation:
-Retrieved documents and the enhanced query are fed into GPT-4o-mini to generate a coherent and contextually accurate answer.
+**Retrieved documents** and the **enhanced query** are fed into **GPT-4o-mini** to generate a **coherent** and **contextually** accurate answer.
 
 ### Response Display:
-The final answer is then displayed to the user.
+The final answer is then **displayed** to the user.
+
 ---
 
 ## Customization
 
 ### Adding More Books
-To expand the collection, update the ChromaDB storage and indexing process to include additional books. Modify the data ingestion scripts as needed to handle new collections.
+To expand the collection, update the **ChromaDB** storage and **indexing process** to include additional books. Modify the data ingestion scripts as needed to handle new collections.
 
 ### Modifying the Prompt
-Adjust the PromptTemplate within the generate function to tailor the answer format. This allows you to fine-tune the style and content of the generated responses.
+Adjust the **PromptTemplate** within the generate function to tailor the answer format. This allows you to fine-tune the style and content of the generated responses.
+
 ---
 
 ## Future Enhancements
 
-Database Expansion:
+### Database Expansion:
 Incorporate more book collections to improve the breadth of content retrieval.
 
-Advanced Reranking:
+### Advanced Reranking:
 Integrate more sophisticated reranking models to further refine search results.
 
-Enhanced UI:
+### Enhanced UI:
 Develop a chat-based user interface to improve overall user interaction and accessibility.
 
-Troubleshooting
-API Issues:
+---
+
+## Troubleshooting
+
+### API Issues:
 Ensure your OPENAI_API_KEY is valid and that you have a stable internet connection.
 
-Installation Problems:
+### Installation Problems:
 Verify that all dependencies are installed correctly. Running pip install -r requirements.txt (if a requirements file is provided) may help.
 
-Runtime Errors:
+### Runtime Errors:
 Check for error messages in the terminal. Common issues may involve network connectivity or missing environment variables.
 
-Data Indexing:
+### Data Indexing:
 If queries yield no results, ensure that the book collection has been properly indexed in ChromaDB.
 
-License
+## License
 This project is licensed under the MIT License. See the LICENSE file for more details.
 
-# **Author's**
+## Author's
 Developed by Jacob Casey, Cristian Holmes, and Marcus Quach.
