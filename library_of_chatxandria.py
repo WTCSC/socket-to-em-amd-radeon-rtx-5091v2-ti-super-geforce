@@ -2,29 +2,30 @@ from typing import Annotated
 from typing_extensions import TypedDict
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
-#from langchain_google_vertexai import ChatVertexAI
 from langchain_openai import ChatOpenAI
 import getpass
 import os
 from IPython.display import Image, display
 from pydantic import BaseModel, Field
 from langchain_core.prompts import PromptTemplate
-#from pypdf import PdfReader
 import chromadb
-#from langchain_core.documents import Document
 from langchain_chroma import Chroma
 from sentence_transformers import SentenceTransformer
 from langchain_core.messages import HumanMessage
 from langgraph.types import Command
 from dotenv import load_dotenv
 import socket
+from threading import Thread
+import tkinter as tk
+from tkinter import messagebox
+import logging
 
-client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-# Connect to server
-print("attempting to connect to server")
-client.connect(('localhost', 2000))
-print("Connected to server")
+#Configure logging for detailed debug output
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s [%(levelname)s] %(message)s',
+                    datefmt='%H:%M:%S')
+logger = logging.getLogger(__name__)
 
 load_dotenv(dotenv_path=".env")
 
@@ -64,21 +65,26 @@ persistent_client = chromadb.PersistentClient(path = "my_local_data")
 
 def send_summary(state: State):
 
-    #print("sending AI response to server")
 
     final_summary = state.get("final_summary")
-    client.send(final_summary.encode())
-    response = client.recv(1024).decode()
 
-    print(f"Server says: {response}")
+    if not final_summary:
+        logger.error("No summary found")
+        return ""
+    
+    logger.info("Sending summary")
+
+    client.send(bytes(final_summary, "utf8"))
+
+    #print(f"Server says: {response}")
 
     return {"final_summary": [final_summary]}
 
 # Node for enhancing question for similarity search
 def query_rewrite(state: State):
-    
-    #print("\n---REWRITING QUERY---\n")
-    
+
+    logger.info("Current node: query_rewrite\n")
+
     # Fetch question for state
     messages = state["messages"]
     question = messages[0].content
@@ -99,7 +105,10 @@ def query_rewrite(state: State):
     
     # Sending the message to the model defined above
     response = model.invoke(msg)
-    #print("Rewriten query: " + response.content)
+
+    logger.info("Rewriten query: ", response.content)
+
+    #print("Rewriten query: ", response.content)
     
     # Adding the response question to message flow in state
     return {"messages": [response]}
@@ -110,7 +119,8 @@ def query_rewrite(state: State):
 # Node responsible for finding the correct collection to query
 def collection(state: State):
     
-    #print("\n---FINDING CORRECT COLLECTION---\n")
+
+    logger.info("Current node: collection\n")
 
     # Class for forcing the output to be specific so that routing can be more consistant
     class collection(BaseModel):
@@ -146,6 +156,8 @@ def collection(state: State):
     # Defines the collection specifyed by the output schema
     collection = collection_result.collection_name
 
+    logger.info(f"Collection: {collection}")
+
     # Adds the collection name to state so it can be called through conventional edges
     state_update = {
             "collection_name": collection,
@@ -159,23 +171,25 @@ def collection(state: State):
     
 # preforms the cosin similarity
 def similarity_search(state: State):
+    
+    logger.info("Current node: similarity_search\n")
 
     # fetch REWRIT question (better for similarity search)
     messages = state["messages"]
     question = messages[1].content
 
-    #print("\n---PREFORMING SIMILARITY SEARCH---\n")
-
     # Pulls the collection name var from the state
     collection_name = state.get("collection_name")
 
-    #print(f"\nSearching collection: {collection_name}\n")
+    logger.info(f"Searching collection: {collection_name}")
     
     # Defines how many dimentions the embeddings should be formatted into
     dimensions = 384
 
     # Defines the embedding model used for future embeddings
     model = SentenceTransformer("mixedbread-ai/mxbai-embed-large-v1", truncate_dim=dimensions,)
+
+    logger.info(f"Embedding query: {question}")
 
     # Creates the call for the embedding model and defines embedding list 
     query_embed = model.encode(question)
@@ -205,6 +219,8 @@ def similarity_search(state: State):
             "docs": docs,
     }
 
+    logger.info(f"Docs retrieved: {docs}")
+
     # Command for the state update
     return Command(update=state_update)
 
@@ -213,15 +229,22 @@ def similarity_search(state: State):
 # Generate node for final summary
 def generate(state: State):
 
-    #print("\n---GENERATING INFORMATION---\n")
+    logger.info("Current node: generate\n")
     
     # fetch original question and docs
     messages = state["messages"]
     question = messages[0].content
     docs = state.get("docs")
 
-    #print(f"question for gen: {question} docs to pull from: {docs}")
+    if not docs:
+        logger.error("No documents found to summarize.")
+        return ""
 
+    if not question:
+        logger.error("No question found to summarize.")
+        return ""
+
+    logger.info(f"Question for generation: {question} docs to pull from: {docs}")
     # Prompt used for summarisation
     msg = [
         HumanMessage(
@@ -247,11 +270,9 @@ def generate(state: State):
     # Invoking the model
     response = model.invoke(msg)
 
-    #print("\n---SUMMARY---\n")
-
-    #print("summary:", response.content)
-
     final_summary = response.content
+
+    logger.info("Summary:", response.content)
 
     state_update = {
             "final_summary": final_summary,
@@ -259,10 +280,6 @@ def generate(state: State):
 
     # Command for updating the state
     return Command(update=state_update)
-
-
-    # Adds summary into the messages cadigory in the state
-    #return {"messages": [response]}
 
                             ##CONVENTIONAL EDGES##
 
@@ -312,13 +329,13 @@ def route_RAG(state: State):
 
     # based on the LLM's output what node to go to (query_rewrite or END)
     if route == 'RAG':
-        #print("\nROUTE: query_rewrite\n")
+        logger.info("ROUTE: query_rewrite\n")
         return "query_rewrite"
     elif route == 'END':
-        #print("\nROUTE: END\n")
+        logger.info("ROUTE: END\n")
         return END
     else:
-        #print("Error route not valid")
+        logger.error("LLM response does not match edge conditions")
         return END
 
 
@@ -330,14 +347,14 @@ def route_collection(state: State):
 
     # Not in collection
     if collection == 'END':
-        #print("\nbook not in collection\n")
-        #print("\n ROUTE: END\n")
+        logger.info("Book not in collection")
+        logger.info("ROUTE: END\n")
         return END
     
     # In Collection
     else:
-        #print("Collection name:", collection)
-        #print("\n ROUTE: similarity_search\n")
+        logger.info("Collection name:", collection)
+        logger.info("ROUTE: similarity_search\n")
         return "similarity_search"
 
 
@@ -376,7 +393,9 @@ graph_builder.add_edge("generate", "send_summary")
 
 graph_builder.add_edge("send_summary", END)
 
+
                         ##COMPILE THE GRAPH
+logger.info("Building the graph")
 graph = graph_builder.compile()
 
 # Image for structure of the graph of nodes and edges
@@ -385,34 +404,88 @@ graph = graph_builder.compile()
 # Activates the graph and updates the stream
 def stream_graph_updates(user_input: str):
     for event in graph.stream({"messages": [{"role": "user", "content": user_input}]}):
-        stream_mode = "debug"
+        #stream_mode = "debug"
+        x = 1
         #for value in event.values():
             #print("Assistant:", value["messages"][-1].content)
             #message += value["messages"][-1].content
 
-
-# User interaction loop
-def main():
+#Function used to receive messages.
+def receive():
     while True:
-        print("\nEnter a query (or type 'q' to quit)\n")
-        user_input = input("User: ")
-        if user_input.lower() in ["quit", "exit", "q"]:
-            print("Goodbye!")
-            return
-        if not user_input:
-            break
-        client.send(user_input.encode())
-        response = client.recv(1024).decode()
-        print(f"\nServer says: {response}\n")
+        try:
+            message = client.recv(1024).decode()
+            message_list.insert(tk.END, message)
+        except Exception:
+            logger.error("An error occured while receiving the message.")
 
-        stream_graph_updates(user_input)
+#Function used to send messages.
+def send():
+    message = my_message.get()
+    my_message.set("")
+    
+    print(f"sending {message} to graph:")
+
+    client.send(bytes(message, "utf8"))
+
+    stream_graph_updates(message)
 
 
-if __name__ == "__main__":
-    main()
-        
-#user_input = "where does gatsby describe his cars and their colors"
-#user_input = "test"
-#user_input = "why is george orwells 1984 seen as weird"
+# Creates the tkinter application.
+window = tk.Tk()
 
-#stream_graph_updates(user_input)
+# Names the application.
+window.title("Chat room")
+
+# Color scheme.
+window.configure(bg="white")
+
+# This creates the box where the messages will exist and update.
+message_frame = tk.Frame(window, height=100, width=100, bg="white")
+message_frame.pack()
+
+# Creates a string variable for the user's message.
+my_message = tk.StringVar()
+my_message.set("")
+
+# Adds a scroll bar to view older messages in chat room. 
+scroll_bar = tk.Scrollbar(message_frame)
+
+# Merges the frame and scroll bar together. 
+message_list = tk.Listbox(message_frame, height=15, width=100, bg="white", yscrollcommand=scroll_bar.set)
+
+# Puts the scroll bar on the right side of the frame.
+scroll_bar.pack(side=tk.RIGHT, fill=tk.Y)
+message_list.pack(side=tk.LEFT, fill=tk.BOTH)
+message_list.pack()
+
+# Adds a box where the user can type messages that will be sent. 
+entry_field = tk.Entry(window, textvariable=my_message, fg="black", width=50)
+entry_field.pack()
+
+# Creates a button that will be used to send messages into the chat room. 
+send_button = tk.Button(window, text="Send", font="Aerial", fg="white", bg="black", command=send)
+send_button.pack()
+
+
+
+# Run the GUI event loop
+#window.mainloop()
+
+# IP address and port used to connect clients to the server. 
+host = "localhost"
+port = 2000
+
+# Create a socket object.
+client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+# Connect to server. 
+client.connect((host, port))
+logger.info("connected to server")
+
+# Thread used to allow multiple client requests to the server at the same time. 
+receive_thread = Thread(target=receive)
+receive_thread.start()
+
+#This function is used to keep the tkinter function running until the application window is closed.
+tk.mainloop()
